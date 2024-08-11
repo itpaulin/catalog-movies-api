@@ -38,16 +38,22 @@ export class MovieService {
   }
 
   async createMovie(data: Prisma.MovieCreateInput): Promise<Movie> {
+    const alreadyExists = await this.prisma.movie.findFirst({
+      where: { id: data.id },
+    });
+
+    if (alreadyExists) {
+      return this.prisma.movie.update({
+        where: { id: data.id },
+        data,
+      });
+    }
     return this.prisma.movie.create({
       data,
     });
   }
 
-  async deleteAllMovies(): Promise<void> {
-    await this.prisma.movie.deleteMany();
-  }
-
-  async fetchMoviesFromAPI(): Promise<Movie[]> {
+  async fetchMoviesFromAPI(page: number, limit: number): Promise<Movie[]> {
     const response = await axios.get(
       `https://api.themoviedb.org/3/movie/popular`,
       {
@@ -57,12 +63,14 @@ export class MovieService {
         },
         params: {
           language: 'pt-BR',
-          page: 2,
+          page,
+          limit,
         },
       },
     );
 
     return response.data.results.map((movie: any) => ({
+      id: movie.id,
       title: movie.title,
       overview: movie.overview,
       imagePath: movie.poster_path,
