@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Movie" (
-    "id" SERIAL NOT NULL,
+    "id" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
     "imagePath" TEXT NOT NULL,
     "releaseDate" TIMESTAMP(3) NOT NULL,
