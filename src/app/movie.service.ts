@@ -6,6 +6,7 @@ import axios from 'axios';
 @Injectable()
 export class MovieService {
   constructor(private prisma: PrismaService) {}
+  private readonly apiKey: string = process.env.TMDB_API_KEY ?? '';
 
   async movie(
     movieWhereUniqueInput: Prisma.MovieWhereUniqueInput,
@@ -59,7 +60,7 @@ export class MovieService {
       {
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
         params: {
           language: 'pt-BR',
