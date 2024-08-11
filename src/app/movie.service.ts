@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/infra/database/prisma/prisma.service';
 import { Movie, Prisma } from '@prisma/client';
+import axios from 'axios';
 
 @Injectable()
 export class MovieService {
@@ -15,20 +16,25 @@ export class MovieService {
   }
 
   async movies(params: {
-    skip?: number;
-    take?: number;
+    page?: number;
+    limit?: number;
     cursor?: Prisma.MovieWhereUniqueInput;
     where?: Prisma.MovieWhereInput;
     orderBy?: Prisma.MovieOrderByWithRelationInput;
   }): Promise<Movie[]> {
-    const { cursor, orderBy, skip, take, where } = params;
+    const { page = 1, limit = 10, cursor, orderBy, where } = params;
+
     return this.prisma.movie.findMany({
-      skip,
-      take,
+      skip: (page - 1) * limit,
+      take: limit,
       cursor,
       where,
       orderBy,
     });
+  }
+
+  async countMovies(where?: Prisma.MovieWhereInput): Promise<number> {
+    return this.prisma.movie.count({ where });
   }
 
   async createMovie(data: Prisma.MovieCreateInput): Promise<Movie> {
@@ -39,5 +45,28 @@ export class MovieService {
 
   async deleteAllMovies(): Promise<void> {
     await this.prisma.movie.deleteMany();
+  }
+
+  async fetchMoviesFromAPI(): Promise<Movie[]> {
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/movie/popular`,
+      {
+        headers: {
+          accept: 'application/json',
+          Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
+        },
+        params: {
+          language: 'pt-BR',
+          page: 2,
+        },
+      },
+    );
+
+    return response.data.results.map((movie: any) => ({
+      title: movie.title,
+      overview: movie.overview,
+      imagePath: movie.poster_path,
+      releaseDate: new Date(movie.release_date),
+    }));
   }
 }
