@@ -29,8 +29,18 @@ docker-compose up -d
 
 Este comando iniciará o PostgreSQL em um container Docker, rodando em segundo plano. Lembre-se de ter o Docker e abrir ele em seu computador.
 
-3. Configuração Completa e Inicialização
-   Com o banco de dados em execução, você pode configurar e iniciar a aplicação com um único comando:
+3. Configure seu .env
+   Use de exemplo o .env.example para a URL do banco de dados, porém a KEY do TMDB deverá ser resgatada no próprio site:
+   [Clique aqui para ir para o site do TMDB](https://www.themoviedb.org/settings/api).
+
+Depois que tiver a chave pode rodar esse comando para criar o .env automaticamente, apenas substituindo 'SUA_TMDB_API_KEY' pelo valor real
+
+```
+printf "DATABASE_URL=\"postgres://postgres:password@localhost:5432/\"\nTMDB_API_KEY=%s\n" "SUA_TMDB_API_KEY" > .env
+```
+
+4. Configuração Completa e Inicialização
+   Com o banco de dados em execução e o .env criado, você pode configurar e iniciar a aplicação com um único comando:
 
 ```
 npm run setup
