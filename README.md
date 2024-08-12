@@ -14,8 +14,8 @@ npm (gerenciador de pacotes do Node.js)
 1. Clonar o Repositório
 
 ```
-git clone https://github.com/seu-usuario/seu-repositorio.git
-cd seu-repositorio
+git clone https://github.com/itpaulin/catalog-movies-api.git
+cd catalog-movies-api
 ```
 
 2. Subir o Banco de Dados PostgreSQL com Docker
