@@ -54,28 +54,37 @@ export class MovieService {
     });
   }
 
-  async fetchMoviesFromAPI(page: number, limit: number): Promise<Movie[]> {
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/movie/popular`,
-      {
-        headers: {
-          accept: 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        params: {
-          language: 'pt-BR',
-          page,
-          limit,
-        },
-      },
-    );
+  async fetchMoviesFromAPI(): Promise<void> {
+    this.prisma.movie.deleteMany({});
+    const pageState = await this.prisma.indexState.findFirst({});
 
-    return response.data.results.map((movie: any) => ({
-      id: movie.id,
-      title: movie.title,
-      overview: movie.overview,
-      imagePath: movie.poster_path,
-      releaseDate: new Date(movie.release_date),
-    }));
+    //populando banco de dados com os filmes
+    for (let i = pageState?.page ?? 1; i <= 20; i++) {
+      const response = await axios.get(
+        'https://api.themoviedb.org/3/movie/popular',
+        {
+          params: {
+            page: i,
+          },
+        },
+      );
+
+      const moviesTyped = response.data.results.map((movie: any) => ({
+        id: movie.id,
+        title: movie.title,
+        overview: movie.overview,
+        imagePath: movie.poster_path,
+        releaseDate: new Date(movie.release_date),
+      }));
+
+      for (const movie of moviesTyped) {
+        await this.createMovie(movie);
+      }
+    }
+    this.prisma.indexState.upsert({
+      where: { id: 1 },
+      update: { page: 20 },
+      create: { page: 20 },
+    });
   }
 }
