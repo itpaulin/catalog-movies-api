@@ -69,8 +69,7 @@ export class MovieService {
 
     const quantityRequests = 5;
     const pageState = await this.indexStateService.indexState();
-
-    if (pageState) return;
+    if (!pageState) return;
 
     const newMovies: Movie[] = [];
 
@@ -94,6 +93,7 @@ export class MovieService {
               console.warn(`Data inválida para o filme: ${movie.title}.`);
               return;
             }
+            if (!movie.poster_path || !movie.overview) return;
 
             newMovies.push({
               id: movie.id,
