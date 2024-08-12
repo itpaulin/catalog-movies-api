@@ -13,15 +13,6 @@ export class MovieController {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    const newMovies = await this.movieService.fetchMoviesFromAPI(
-      pageNumber,
-      limitNumber,
-    );
-
-    for (const movie of newMovies) {
-      await this.movieService.createMovie(movie);
-    }
-
     const movies = await this.movieService.movies({
       page: pageNumber,
       limit: limitNumber,
@@ -33,5 +24,11 @@ export class MovieController {
       data: movies,
       total,
     };
+  }
+
+  @Get('renew')
+  async reindexar(): Promise<string> {
+    await this.movieService.fetchMoviesFromAPI();
+    return 'Reindexação iniciada';
   }
 }
