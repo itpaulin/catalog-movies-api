@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/infra/database/prisma/prisma.service';
 import { Movie, Prisma } from '@prisma/client';
+import { IndexStateService } from './index-state.service';
 import axios from 'axios';
 
 @Injectable()
 export class MovieService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private indexStateService: IndexStateService,
+  ) {}
   private readonly apiKey: string = process.env.TMDB_API_KEY ?? '';
 
   async movie(
@@ -54,37 +58,57 @@ export class MovieService {
     });
   }
 
+  async createManyMovies(
+    data: Prisma.MovieCreateManyInput[],
+  ): Promise<Prisma.BatchPayload> {
+    return this.prisma.movie.createMany({ data });
+  }
+
   async fetchMoviesFromAPI(): Promise<void> {
-    this.prisma.movie.deleteMany({});
-    const pageState = await this.prisma.indexState.findFirst({});
+    await this.prisma.movie.deleteMany({});
 
-    //populando banco de dados com os filmes
-    for (let i = pageState?.page ?? 1; i <= 20; i++) {
-      const response = await axios.get(
-        'https://api.themoviedb.org/3/movie/popular',
-        {
-          params: {
-            page: i,
+    const quantityRequests = 5;
+    const pageState = await this.indexStateService.indexState();
+
+    if (pageState) return;
+
+    const newMovies: Movie[] = [];
+
+    for (let index = 0; index <= quantityRequests; index++) {
+      await axios
+        .get('https://api.themoviedb.org/3/movie/popular', {
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${this.apiKey}`,
           },
-        },
-      );
+          params: {
+            language: 'pt-BR',
+            page: pageState + index,
+          },
+        })
+        .then((response) => {
+          response.data.results.map((movie: any) => {
+            const releaseDate = new Date(movie.release_date);
 
-      const moviesTyped = response.data.results.map((movie: any) => ({
-        id: movie.id,
-        title: movie.title,
-        overview: movie.overview,
-        imagePath: movie.poster_path,
-        releaseDate: new Date(movie.release_date),
-      }));
+            if (isNaN(releaseDate.getTime())) {
+              console.warn(`Data inválida para o filme: ${movie.title}.`);
+              return;
+            }
 
-      for (const movie of moviesTyped) {
-        await this.createMovie(movie);
-      }
+            newMovies.push({
+              id: movie.id,
+              title: movie.title,
+              imagePath: movie.poster_path,
+              overview: movie.overview,
+              releaseDate: releaseDate,
+            });
+          });
+        })
+        .catch((error) => console.log(error));
     }
-    this.prisma.indexState.upsert({
-      where: { id: 1 },
-      update: { page: 20 },
-      create: { page: 20 },
-    });
+
+    await this.createManyMovies(newMovies);
+
+    await this.indexStateService.updateIndexState(pageState + quantityRequests);
   }
 }
