@@ -1,73 +1,76 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Projeto Backend - Catálogo de Filmes
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este é o backend de uma aplicação para o catálogo de filmes, construída com NestJS e Prisma ORM, utilizando PostgreSQL como banco de dados.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Pré-requisitos
+Antes de começar, certifique-se de ter os seguintes softwares instalados em sua máquina:
 
-## Description
+Node.js (versão 14.x ou superior)
+Docker e Docker Compose
+npm (gerenciador de pacotes do Node.js)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Passo a Passo de Configuração
 
-## Installation
+1. Clonar o Repositório
 
-```bash
-$ npm install
+```
+git clone https://github.com/seu-usuario/seu-repositorio.git
+cd seu-repositorio
 ```
 
-## Running the app
+2. Subir o Banco de Dados PostgreSQL com Docker
+   O projeto inclui um arquivo docker-compose.yml que configura e inicia um container com o banco de dados PostgreSQL.
 
-```bash
-# development
-$ npm run start
+Execute o seguinte comando para subir o banco de dados:
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+docker-compose up -d
 ```
 
-## Test
+Este comando iniciará o PostgreSQL em um container Docker, rodando em segundo plano. Lembre-se de ter o Docker e abrir ele em seu computador.
 
-```bash
-# unit tests
-$ npm run test
+3. Configuração Completa e Inicialização
+   Com o banco de dados em execução, você pode configurar e iniciar a aplicação com um único comando:
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+npm run setup
 ```
 
-## Support
+Este comando irá:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Instalar as dependências (npm install).
+Inicializar o Prisma (npx prisma generate e npx prisma migrate dev).
+Iniciar a aplicação em modo de desenvolvimento (npm run start:dev).
 
-## Stay in touch
+A aplicação estará disponível em http://localhost:3000.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+4. Outros Comandos Úteis
+   Rodar Migrações Prisma: Se você fizer alterações no schema do Prisma e precisar aplicá-las ao banco de dados:
 
-## License
+```
+npm run prisma:init
+```
 
-Nest is [MIT licensed](LICENSE).
+Acessar o Prisma Studio: Uma interface gráfica para visualizar e editar os dados diretamente no banco:
+
+```
+npx prisma studio
+```
+
+Parar o Container Docker:
+
+```
+docker-compose down
+```
+
+Estrutura do Projeto
+src/: Contém o código fonte da aplicação.
+prisma/: Contém o arquivo schema.prisma que define os modelos do banco de dados.
+docker-compose.yml: Arquivo para configurar e rodar o banco de dados PostgreSQL via Docker.
+.env: Arquivo de configuração de variáveis de ambiente (não deve ser incluído no controle de versão).
+
+Explicação das Variáveis de Ambiente:
+DATABASE_URL: Esta variável é fundamental para a conexão da aplicação com o banco de dados PostgreSQL. O formato da URL segue o padrão postgres://USUARIO:SENHA@HOST:PORTA/NOME_DO_BANCO.
+
+TMDB_API_KEY: Esta variável é usada para autenticar as requisições à API do TMDB, que fornece os dados dos filmes. Você precisa criar uma conta no TMDB e gerar uma chave de API para obter esses dados.
+[Clique aqui para ir para o site do TMDB](https://www.themoviedb.org/settings/api)
