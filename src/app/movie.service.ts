@@ -58,30 +58,14 @@ export class MovieService {
     });
   }
 
-  async createManyMovies(
-    data: Prisma.MovieCreateManyInput[],
-  ): Promise<Prisma.BatchPayload> {
-    const existingMovies = await this.prisma.movie.findMany({
-      where: {
-        id: {
-          in: data.map((movie) => movie.id),
-        },
-      },
-      select: { id: true },
-    });
-
-    const existingIds = new Set(existingMovies.map((movie) => movie.id));
-
-    const filteredData = data.filter((movie) => !existingIds.has(movie.id));
-
-    if (filteredData.length === 0) {
-      console.log('Todos os filmes já existem. Nenhum novo filme será criado.');
-      return { count: 0 };
+  async createManyMovies(data: Prisma.MovieCreateManyInput[]): Promise<void> {
+    for (const movieData of data) {
+      await this.prisma.movie.upsert({
+        where: { id: movieData.id },
+        update: movieData,
+        create: movieData,
+      });
     }
-
-    return this.prisma.movie.createMany({
-      data: filteredData,
-    });
   }
 
   async fetchMoviesFromAPI(): Promise<void> {
