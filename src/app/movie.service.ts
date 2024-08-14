@@ -72,7 +72,6 @@ export class MovieService {
 
     const existingIds = new Set(existingMovies.map((movie) => movie.id));
 
-    // Filtre filmes que já existem
     const filteredData = data.filter((movie) => !existingIds.has(movie.id));
 
     if (filteredData.length === 0) {
@@ -80,7 +79,6 @@ export class MovieService {
       return { count: 0 };
     }
 
-    // Inserir os filmes filtrados
     return this.prisma.movie.createMany({
       data: filteredData,
     });
